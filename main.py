@@ -10,7 +10,8 @@ import apiclient.discovery
 from oauth2client.service_account import ServiceAccountCredentials
 
 CREDENTIALS_FILE = 'credentials.json'
-spreadsheet_id = '1XeMxUrlBCFaENJBJVivaNEPDK-wHrDlzeWem37bWAJE'
+#spreadsheet_id = '1XeMxUrlBCFaENJBJVivaNEPDK-wHrDlzeWem37bWAJE'
+spreadsheet_id = '1ImX2APTLpHKbWs01QjXBJTFES8p0umkbEI2Ffn_VD-0' # test
 credentials = ServiceAccountCredentials.from_json_keyfile_name(
     CREDENTIALS_FILE,
     ['https://www.googleapis.com/auth/spreadsheets',
@@ -184,9 +185,99 @@ def get_currency_price(currency_pair):
     response = request(PATH, 'get', headers, params)
     return float(response['info']['price'])
 
+def prepare_sheets():
+    sheets_txt = open('sheets.txt', 'r+')
+    line = next(sheets_txt)
+    print(line)
+    if line == 'yes':
+        return
+    values = service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id,
+        body={
+              "requests": [
+                {
+                  "addConditionalFormatRule": {
+                    "rule": {
+                      "ranges": [
+                        {
+                          "startColumnIndex": 0,
+                          "endColumnIndex": 6,
+                          "startRowIndex": 1,
+                          "endRowIndex": 2000
+                        }
+                      ],
+                      "booleanRule": {
+                        "condition": {
+                          "type": "CUSTOM_FORMULA",
+                          "values": [
+                            {
+                              "userEnteredValue": "=$F2>0"
+                            }
+                          ]
+                        },
+                        "format": {
+                          "backgroundColor": {
+                            "green": 0.88,
+                            "red": 0.72,
+                            "blue": 0.8,
+                          }
+                        }
+                      }
+                    },
+                    "index": 0
+                  }
+                }
+              ]
+            }
+    ).execute()
+    values = service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id,
+        body={
+            "requests": [
+                {
+                    "addConditionalFormatRule": {
+                        "rule": {
+                            "ranges": [
+                                {
+                                    "startColumnIndex": 0,
+                                    "endColumnIndex": 6,
+                                    "startRowIndex": 1,
+                                    "endRowIndex": 2000
+                                }
+                            ],
+                            "booleanRule": {
+                                "condition": {
+                                    "type": "CUSTOM_FORMULA",
+                                    "values": [
+                                        {
+                                            "userEnteredValue": "=$F2<0"
+                                        }
+                                    ]
+                                },
+                                "format": {
+                                    "backgroundColor": {
+                                        "green": 0.8,
+                                        "red": 0.96,
+                                        "blue": 0.8,
+                                    }
+                                }
+                            }
+                        },
+                        "index": 0
+                    }
+                }
+            ]
+        }
+    ).execute()
+    sheets_txt.seek(0)  # move file pointer to beginning of file
+    sheets_txt.write('yes')
+    sheets_txt.close()
+
 def main():
+    prepare_sheets()
     get_orders()
     last_order = get_all_orders_info()
+    orders_txt.close()
 
 
 if __name__ == '__main__':
