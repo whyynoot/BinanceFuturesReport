@@ -11,6 +11,9 @@ Also in main.py set up spreadsheet ID.
 Only last 7 days orders are supported. 
 After new trading day I suggest running script to get day statistics.
 
+sheets and orders txt files:
+If you want to set up new google sheet -> set sheets.txt to `no` and delete all lines from orders.txt
+
 Output: 
 
-![image](https://user-images.githubusercontent.com/63478397/128442834-36a5c036-c24b-4a70-98ce-68524dec5765.png)
+![image](https://user-images.githubusercontent.com/63478397/128729721-07a4d298-d849-48be-9d42-fa50dc43ab0c.png)
