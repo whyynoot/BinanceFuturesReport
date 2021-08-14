@@ -10,8 +10,8 @@ import apiclient.discovery
 from oauth2client.service_account import ServiceAccountCredentials
 
 CREDENTIALS_FILE = 'credentials.json'
-#spreadsheet_id = '1XeMxUrlBCFaENJBJVivaNEPDK-wHrDlzeWem37bWAJE'
-spreadsheet_id = '1ImX2APTLpHKbWs01QjXBJTFES8p0umkbEI2Ffn_VD-0' # test
+spreadsheet_id = '1XeMxUrlBCFaENJBJVivaNEPDK-wHrDlzeWem37bWAJE'
+#spreadsheet_id = '1ImX2APTLpHKbWs01QjXBJTFES8p0umkbEI2Ffn_VD-0' # test
 credentials = ServiceAccountCredentials.from_json_keyfile_name(
     CREDENTIALS_FILE,
     ['https://www.googleapis.com/auth/spreadsheets',
@@ -63,8 +63,14 @@ def get_position_information(json, id, side, symbol, qty):
             current_qty += float(order['quoteQty'])
             if order['commissionAsset'] != commission_type:
                 print('Commission different types;')
-                raise ValueError
-            commission += float(order['commission'])
+                if commission_type == 'USDT':
+                    commission += float(order['commission']) * BNB_PRICE
+                    next((item for item in json['info'] if item["orderId"] == id))['commissionAsset'] = 'BNB & USDT'
+                if commission_type == 'BNB':
+                    next((item for item in json['info'] if item["orderId"] == id))['commissionAsset'] = 'BNB & USDT'
+                    commission += float(order['commission'])
+            else:
+                commission += float(order['commission'])
             #print(f"Added to position {order['quoteQty']}, Current Position QTY: {current_qty}\nCommission Asset: {order['commissionAsset']}\Commission: {order['commission']}")
     #print(f'Position: {position} | Pair: {symbol} | Commission Asset: {commission_type} | Total Commission getting positions: {"{0:.20f}".format(commission)}')
     return position, commission
@@ -161,21 +167,10 @@ def get_orders():
         orders.append(line.replace('\n', ''))
 
 
-
 def save_order(order):
     global orders
     orders_txt.write(str(order) + '\n')
 
-
-def color_rows():
-    values = service.spreadsheets().values().batchUpdateByDataFilter(
-        spreadsheetId=spreadsheet_id,
-        valueInputOption="USER_ENTERED",
-        body={'data' : {
-
-        }}
-    ).execute()
-    print(values['values'])
 
 def get_currency_price(currency_pair):
     PATH = 'https://api.binance.com/api/v3/avgPrice'
@@ -188,7 +183,6 @@ def get_currency_price(currency_pair):
 def prepare_sheets():
     sheets_txt = open('sheets.txt', 'r+')
     line = next(sheets_txt)
-    print(line)
     if line == 'yes':
         return
     values = service.spreadsheets().batchUpdate(
@@ -280,8 +274,9 @@ def main():
     orders_txt.close()
 
 
+orders_txt = open('orders.txt', 'r+')
 if __name__ == '__main__':
-    orders_txt = open('orders.txt', 'r+')
+    #orders_txt = open('orders.txt', 'r+')
     BNB_PRICE = get_currency_price('BNBUSDT')
     main()
 
