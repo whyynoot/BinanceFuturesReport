@@ -17,3 +17,10 @@ If you want to set up new google sheet -> set sheets.txt to `no` and delete all 
 Output: 
 
 ![image](https://user-images.githubusercontent.com/63478397/128729721-07a4d298-d849-48be-9d42-fa50dc43ab0c.png)
+
+For spot support: 
+You have to add "Spot" list on Google Sheets.
+
+Outpout:
+![image](https://user-images.githubusercontent.com/63478397/129458598-e4532a39-70ab-4829-af5f-793fddec539c.png)
+
